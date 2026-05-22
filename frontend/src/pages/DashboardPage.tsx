@@ -23,10 +23,6 @@ export default function DashboardPage() {
     queryFn: () => tasksApi.list({ from_date: today, to_date: today, pending_only: true }),
   })
 
-  const pendingByGarden: Record<number, number> = {}
-  todayTasks?.forEach(t => {
-    // We don't have garden_id directly on task, so we count globally
-  })
 
   const pendingCount = todayTasks?.length ?? 0
   const rainSkippedCount = todayTasks?.filter(t => t.auto_skipped_by_rain).length ?? 0

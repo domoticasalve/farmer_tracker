@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight, CloudRain, LayoutGrid, AlignJustify } from 'lucide-react'
 import {
   startOfWeek, endOfWeek, startOfMonth, endOfMonth,
-  eachDayOfInterval, format, isSameDay, isToday,
+  eachDayOfInterval, format, isToday,
   addWeeks, subWeeks, addMonths, subMonths, isSameMonth
 } from 'date-fns'
 import { es } from 'date-fns/locale'

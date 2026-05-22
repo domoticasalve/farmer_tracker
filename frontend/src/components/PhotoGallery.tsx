@@ -3,7 +3,6 @@ import { Camera, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { photosApi } from '../api/photos'
 import { Button } from './ui/Button'
-import { Modal } from './ui/Modal'
 import { Input } from './ui/Input'
 import type { Photo } from '../types'
 
