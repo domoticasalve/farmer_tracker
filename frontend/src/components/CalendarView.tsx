@@ -142,7 +142,7 @@ export function CalendarView({ tasks, gardenId }: CalendarViewProps) {
                         ? <CloudRain size={9} className="text-water-500 shrink-0" />
                         : <span className="shrink-0">{meta.icon}</span>
                       }
-                      <span className="truncate">{task.title.split('—')[0].trim()}</span>
+                      <span className="truncate">{task.title.split('—')[1]?.trim() ?? task.title.split('—')[0].trim()}</span>
                     </button>
                   )
                 })}
