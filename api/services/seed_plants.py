@@ -113,16 +113,21 @@ PLANTS = [
 
 
 def run_seed(db: Session):
-    if db.query(PlantCatalogue).count() > 0:
-        return  # ya sembrado
+    existing = {p.name_es for p in db.query(PlantCatalogue.name_es).all()}
+    inserted = 0
 
     for p in PLANTS:
+        p = dict(p)
         stages_data = p.pop("stages", [])
+        if p["name_es"] in existing:
+            continue
         plant = PlantCatalogue(**p)
         db.add(plant)
         db.flush()
         for s in stages_data:
             db.add(PlantStage(plant_id=plant.id, **s))
+        inserted += 1
 
-    db.commit()
-    print(f"Seed completado: {len(PLANTS)} plantas insertadas.")
+    if inserted:
+        db.commit()
+        print(f"Seed completado: {inserted} plantas insertadas.")
