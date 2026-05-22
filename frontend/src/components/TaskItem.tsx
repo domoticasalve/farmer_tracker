@@ -34,6 +34,11 @@ export function TaskItem({ task, queryKey, compact = false }: TaskItemProps) {
     onSuccess: invalidateAll
   })
 
+  const unskip = useMutation({
+    mutationFn: () => tasksApi.uncomplete(task.id),
+    onSuccess: invalidateAll
+  })
+
   const isCompleted = !!task.completed_at
   const isSkipped   = task.skipped
   const daysDiff    = daysUntil(task.scheduled_date)
@@ -48,10 +53,11 @@ export function TaskItem({ task, queryKey, compact = false }: TaskItemProps) {
     )}>
       {/* Checkbox / state */}
       <button
-        disabled={isCompleted || isSkipped || complete.isPending}
-        onClick={() => complete.mutate()}
+        disabled={isCompleted || complete.isPending || unskip.isPending}
+        onClick={() => isSkipped ? unskip.mutate() : complete.mutate()}
         className="mt-0.5 flex-shrink-0 focus:outline-none"
-        aria-label="Marcar como completada"
+        aria-label={isSkipped ? 'Deshacer salto' : 'Marcar como completada'}
+        title={isSkipped ? 'Clic para deshacer salto' : undefined}
       >
         {isCompleted ? (
           <CheckCircle2
@@ -59,9 +65,12 @@ export function TaskItem({ task, queryKey, compact = false }: TaskItemProps) {
             className={cn('text-sage-500', justCompleted && 'check-anim')}
           />
         ) : isSkipped ? (
-          task.auto_skipped_by_rain
-            ? <CloudRain size={20} className="text-water-400" />
-            : <SkipForward size={20} className="text-stone-400" />
+          <span className={cn('hover:text-stone-600 transition-colors', unskip.isPending && 'animate-pulse')}>
+            {task.auto_skipped_by_rain
+              ? <CloudRain size={20} className="text-water-400" />
+              : <SkipForward size={20} className="text-stone-400 hover:text-harvest" />
+            }
+          </span>
         ) : (
           <Circle size={20} className={cn('text-stone-300 hover:text-sage-400 transition-colors', complete.isPending && 'animate-pulse')} />
         )}

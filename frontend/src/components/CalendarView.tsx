@@ -143,19 +143,23 @@ export function CalendarView({ gardenId }: CalendarViewProps) {
                   return (
                     <button
                       key={task.id}
-                      disabled={task.skipped || complete.isPending || uncomplete.isPending}
+                      disabled={complete.isPending || uncomplete.isPending}
                       onClick={() => {
-                        if (task.skipped) return
-                        if (done) uncomplete.mutate(task.id)
+                        if (task.skipped) uncomplete.mutate(task.id)
+                        else if (done) uncomplete.mutate(task.id)
                         else complete.mutate(task.id)
                       }}
                       className={cn(
-                        'task-chip w-full justify-start truncate cursor-pointer',
+                        'task-chip w-full justify-start truncate cursor-pointer hover:brightness-95',
                         meta.bg, meta.border, meta.text,
-                        task.skipped ? 'opacity-40 cursor-default' : 'hover:brightness-95',
+                        task.skipped ? 'opacity-40' : '',
                         done ? 'opacity-60 line-through' : ''
                       )}
-                      title={done ? `${task.title} (clic para desmarcar)` : task.title}
+                      title={
+                        task.skipped ? `${task.title} (clic para deshacer salto)` :
+                        done ? `${task.title} (clic para desmarcar)` :
+                        task.title
+                      }
                     >
                       {task.auto_skipped_by_rain
                         ? <CloudRain size={9} className="text-water-500 shrink-0" />
