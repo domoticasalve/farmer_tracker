@@ -43,7 +43,7 @@ def add_plant_to_garden(
     db.add(gp)
     db.flush()
 
-    if data.sowing_date and garden.lat and garden.lon:
+    if data.sowing_date:
         generate_tasks_for_plant(db, gp, garden)
 
     db.commit()
