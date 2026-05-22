@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --forest:    #1C3A0E;
+  --fern:      #2D5016;
+  --sage:      #4A7C3F;
+  --sprout:    #7BAE6B;
+  --cream:     #F7F3EC;
+  --parchment: #EDE7D9;
+  --linen:     #E2D9C8;
+  --earth:     #8B5E3C;
+  --clay:      #C4714A;
+  --water:     #4A8FA8;
+  --harvest:   #D4840A;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background-color: var(--cream);
+  color: var(--forest);
+  min-height: 100dvh;
+}
+
+h1, h2, h3, .font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--parchment); }
+::-webkit-scrollbar-thumb { background: #c0b8a8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #a89e8a; }
+
+/* Safe area for mobile (notch/home bar) */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+
+/* Botanical texture overlay — used on the login hero panel */
+.botanical-bg {
+  background-color: var(--fern);
+  background-image:
+    radial-gradient(ellipse 60% 80% at 20% 80%, rgba(74,124,63,0.6) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(28,58,14,0.8) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 5 C30 5 15 20 15 35 C15 44 21.7 51 30 51 C38.3 51 45 44 45 35 C45 20 30 5 30 5Z' fill='none' stroke='rgba(123,174,107,0.12)' stroke-width='1'/%3E%3Cline x1='30' y1='5' x2='30' y2='51' stroke='rgba(123,174,107,0.08)' stroke-width='0.8'/%3E%3C/svg%3E");
+}
+
+/* Card hover lift */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(28, 58, 14, 0.14);
+}
+
+/* Task chip styles */
+.task-chip { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border leading-tight; }
+
+/* Progress bar animation */
+@keyframes grow-bar {
+  from { width: 0; }
+  to   { width: var(--progress); }
+}
+.progress-bar { animation: grow-bar 0.8s ease-out forwards; }
+
+/* Checkbox check animation */
+@keyframes check-pop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.check-anim { animation: check-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* Smooth page transitions */
+.page-enter {
+  animation: fadeUp 0.25s ease-out;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

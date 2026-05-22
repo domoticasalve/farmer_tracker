@@ -1,0 +1,58 @@
+services:
+  api:
+    build: ./api
+    container_name: farmer-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8088:8000"
+    env_file: .env
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - farmer_net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: farmer-postgres
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - farmer_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: farmer-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - farmer_net
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  farmer_net:
+    driver: bridge

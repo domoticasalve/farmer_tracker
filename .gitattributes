@@ -1,0 +1,7 @@
+# Normalizar line endings
+* text=auto
+
+# Scripts de shell SIEMPRE con LF (se ejecutan en Linux)
+*.sh text eol=lf
+Makefile text eol=lf
+deploy.sh text eol=lf
