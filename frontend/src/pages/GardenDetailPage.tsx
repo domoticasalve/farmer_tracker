@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { Pencil, Plus, MapPin, Sprout } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
+import { Pencil, Plus, MapPin, Sprout, CloudRain } from 'lucide-react'
 import { gardensApi } from '../api/gardens'
+import { tasksApi } from '../api/tasks'
 import { Layout } from '../components/Layout'
 import { Tabs, TabList, Tab, TabPanel } from '../components/ui/Tabs'
 import { CalendarView } from '../components/CalendarView'
 import { Badge } from '../components/ui/Badge'
 import { PageLoader } from '../components/ui/Spinner'
-import { STATUS_META, CATEGORY_META, cn, formatDate } from '../lib/utils'
+import { STATUS_META, CATEGORY_META, TASK_META, cn, formatDate } from '../lib/utils'
 
 export default function GardenDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -25,6 +27,20 @@ export default function GardenDetailPage() {
     queryFn: () => gardensApi.plants.list(gardenId),
   })
 
+  const today = format(new Date(), 'yyyy-MM-dd')
+  const { data: todayTasks } = useQuery({
+    queryKey: ['tasks', gardenId, 'today'],
+    queryFn: () => tasksApi.list({ garden_id: gardenId, from_date: today, to_date: today, pending_only: true }),
+  })
+
+  const qc = useQueryClient()
+  const complete = useMutation({
+    mutationFn: (id: number) => tasksApi.complete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks', gardenId, 'today'] })
+      qc.invalidateQueries({ queryKey: ['tasks', gardenId] })
+    },
+  })
 
   if (loadingGarden) return <Layout back="/dashboard"><PageLoader /></Layout>
   if (!garden) return <Layout back="/dashboard"><p className="text-center text-stone-500 py-12">Huerto no encontrado</p></Layout>
@@ -73,6 +89,45 @@ export default function GardenDetailPage() {
           <p className="text-sm text-stone-500 leading-relaxed">{garden.description}</p>
         )}
       </div>
+
+      {/* Today's pending tasks */}
+      {todayTasks && todayTasks.length > 0 && (
+        <div className="mb-5 bg-white/80 rounded-2xl border border-linen shadow-card overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-linen flex items-center gap-2">
+            <span className="text-xs font-semibold text-stone-400 uppercase tracking-wide">Tareas de hoy</span>
+            <span className="ml-auto text-xs font-medium text-harvest bg-harvest/10 px-2 py-0.5 rounded-full">
+              {todayTasks.length}
+            </span>
+          </div>
+          <div className="divide-y divide-linen">
+            {todayTasks.map(task => {
+              const meta = TASK_META[task.action_type]
+              const done = !!task.completed_at
+              return (
+                <div key={task.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <button
+                    disabled={done || task.skipped || complete.isPending}
+                    onClick={() => !done && !task.skipped && complete.mutate(task.id)}
+                    className={cn(
+                      'shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors',
+                      done ? 'bg-sage-400 border-sage-400' : 'border-stone-300 hover:border-sage-400'
+                    )}
+                  >
+                    {done && <span className="text-white text-xs">✓</span>}
+                  </button>
+                  <span className={cn('task-chip shrink-0', meta.bg, meta.border, meta.text)}>
+                    {task.auto_skipped_by_rain ? <CloudRain size={10} /> : <span>{meta.icon}</span>}
+                    {meta.label}
+                  </span>
+                  <span className={cn('text-sm text-forest flex-1 truncate', done && 'line-through text-stone-400')}>
+                    {task.title.split('—')[1]?.trim() ?? task.title}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <Tabs value={tab} onChange={setTab}>

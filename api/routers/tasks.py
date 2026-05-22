@@ -47,7 +47,18 @@ def list_tasks(
     if pending_only:
         query = query.filter(Task.completed_at.is_(None), Task.skipped.is_(False))
 
-    return query.order_by(Task.scheduled_date).all()
+    from sqlalchemy.orm import joinedload
+    tasks = query.options(
+        joinedload(Task.garden_plant).joinedload(GardenPlant.garden)
+    ).order_by(Task.scheduled_date).all()
+
+    result = []
+    for t in tasks:
+        out = TaskOut.model_validate(t)
+        out.garden_id = t.garden_plant.garden_id
+        out.garden_name = t.garden_plant.garden.name
+        result.append(out)
+    return result
 
 
 @router.post("/{task_id}/complete", response_model=TaskOut)

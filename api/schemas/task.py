@@ -5,6 +5,8 @@ from pydantic import BaseModel
 class TaskOut(BaseModel):
     id: int
     garden_plant_id: int
+    garden_id: int = 0
+    garden_name: str = ""
     action_type: str
     title: str
     scheduled_date: date

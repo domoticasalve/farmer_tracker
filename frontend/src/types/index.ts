@@ -63,6 +63,8 @@ export type ActionType = 'SOWING' | 'TRANSPLANT' | 'WATER' | 'FERTILIZE' | 'HARV
 export interface Task {
   id: number
   garden_plant_id: number
+  garden_id: number
+  garden_name: string
   action_type: ActionType
   title: string
   scheduled_date: string
