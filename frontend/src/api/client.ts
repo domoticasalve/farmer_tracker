@@ -14,7 +14,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     ...(init.headers as Record<string, string>),
   }
   if (token) headers['Authorization'] = `Bearer ${token}`
-  if (!(init.body instanceof FormData)) {
+  if (!(init.body instanceof FormData) && !(init.body instanceof URLSearchParams)) {
     headers['Content-Type'] = 'application/json'
   }
 
