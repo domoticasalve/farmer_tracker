@@ -6,31 +6,48 @@ import {
   addWeeks, subWeeks, addMonths, subMonths, isSameMonth
 } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { tasksApi } from '../api/tasks'
 import { TASK_META, cn } from '../lib/utils'
 import type { Task } from '../types'
 
 interface CalendarViewProps {
-  tasks: Task[]
   gardenId: number
 }
 
 type ViewMode = 'week' | 'month'
 
-export function CalendarView({ tasks, gardenId }: CalendarViewProps) {
+export function CalendarView({ gardenId }: CalendarViewProps) {
   const [mode, setMode] = useState<ViewMode>('week')
   const [current, setCurrent] = useState(new Date())
   const qc = useQueryClient()
 
+  const rangeStart = mode === 'week'
+    ? startOfWeek(current, { weekStartsOn: 1 })
+    : startOfWeek(startOfMonth(current), { weekStartsOn: 1 })
+  const rangeEnd = mode === 'week'
+    ? endOfWeek(current, { weekStartsOn: 1 })
+    : endOfWeek(endOfMonth(current), { weekStartsOn: 1 })
+
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['tasks', gardenId, format(rangeStart, 'yyyy-MM-dd'), format(rangeEnd, 'yyyy-MM-dd')],
+    queryFn: () => tasksApi.list({
+      garden_id: gardenId,
+      from_date: format(rangeStart, 'yyyy-MM-dd'),
+      to_date:   format(rangeEnd,   'yyyy-MM-dd'),
+    }),
+  })
+
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['tasks', gardenId] })
+
   const complete = useMutation({
     mutationFn: (id: number) => tasksApi.complete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', gardenId] })
+    onSuccess: invalidate,
   })
 
   const uncomplete = useMutation({
     mutationFn: (id: number) => tasksApi.uncomplete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', gardenId] })
+    onSuccess: invalidate,
   })
 
   const tasksByDate = useMemo(() => {
@@ -42,18 +59,10 @@ export function CalendarView({ tasks, gardenId }: CalendarViewProps) {
     return map
   }, [tasks])
 
-  const days = useMemo(() => {
-    if (mode === 'week') {
-      return eachDayOfInterval({
-        start: startOfWeek(current, { weekStartsOn: 1 }),
-        end:   endOfWeek(current,   { weekStartsOn: 1 })
-      })
-    }
-    return eachDayOfInterval({
-      start: startOfWeek(startOfMonth(current), { weekStartsOn: 1 }),
-      end:   endOfWeek(endOfMonth(current),     { weekStartsOn: 1 })
-    })
-  }, [mode, current])
+  const days = useMemo(
+    () => eachDayOfInterval({ start: rangeStart, end: rangeEnd }),
+    [mode, current] // eslint-disable-line react-hooks/exhaustive-deps
+  )
 
   const prev = () => mode === 'week' ? setCurrent(subWeeks(current, 1)) : setCurrent(subMonths(current, 1))
   const next = () => mode === 'week' ? setCurrent(addWeeks(current, 1)) : setCurrent(addMonths(current, 1))

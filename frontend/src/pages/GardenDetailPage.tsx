@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Pencil, Plus, MapPin, Sprout } from 'lucide-react'
-import { format, startOfMonth, endOfMonth } from 'date-fns'
 import { gardensApi } from '../api/gardens'
-import { tasksApi } from '../api/tasks'
 import { Layout } from '../components/Layout'
 import { Tabs, TabList, Tab, TabPanel } from '../components/ui/Tabs'
 import { CalendarView } from '../components/CalendarView'
@@ -27,16 +25,6 @@ export default function GardenDetailPage() {
     queryFn: () => gardensApi.plants.list(gardenId),
   })
 
-  const now = new Date()
-  const { data: tasks } = useQuery({
-    queryKey: ['tasks', gardenId],
-    queryFn: () => tasksApi.list({
-      garden_id: gardenId,
-      from_date: format(startOfMonth(now), 'yyyy-MM-dd'),
-      to_date:   format(endOfMonth(now), 'yyyy-MM-dd'),
-    }),
-    enabled: tab === 'calendar',
-  })
 
   if (loadingGarden) return <Layout back="/dashboard"><PageLoader /></Layout>
   if (!garden) return <Layout back="/dashboard"><p className="text-center text-stone-500 py-12">Huerto no encontrado</p></Layout>
@@ -173,7 +161,7 @@ export default function GardenDetailPage() {
 
         {/* Calendar tab */}
         <TabPanel value="calendar">
-          <CalendarView tasks={tasks ?? []} gardenId={gardenId} />
+          <CalendarView gardenId={gardenId} />
         </TabPanel>
       </Tabs>
     </Layout>
