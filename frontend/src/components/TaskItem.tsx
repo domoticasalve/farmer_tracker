@@ -16,17 +16,22 @@ export function TaskItem({ task, queryKey, compact = false }: TaskItemProps) {
   const [justCompleted, setJustCompleted] = useState(false)
   const meta = TASK_META[task.action_type]
 
+  const invalidateAll = () => {
+    qc.invalidateQueries({ queryKey })
+    qc.invalidateQueries({ queryKey: ['tasks'] })
+  }
+
   const complete = useMutation({
     mutationFn: () => tasksApi.complete(task.id),
     onSuccess: () => {
       setJustCompleted(true)
-      qc.invalidateQueries({ queryKey })
+      invalidateAll()
     }
   })
 
   const skip = useMutation({
     mutationFn: () => tasksApi.skip(task.id),
-    onSuccess: () => qc.invalidateQueries({ queryKey })
+    onSuccess: invalidateAll
   })
 
   const isCompleted = !!task.completed_at
