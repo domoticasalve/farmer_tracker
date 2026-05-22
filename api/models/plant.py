@@ -1,4 +1,4 @@
-from sqlalchemy import String, Float, Integer, Text, ARRAY
+from sqlalchemy import String, Float, Integer, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from core.database import Base
 
@@ -29,7 +29,7 @@ class PlantStage(Base):
     __tablename__ = "plant_stages"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    plant_id: Mapped[int] = mapped_column(Integer, index=True)
+    plant_id: Mapped[int] = mapped_column(ForeignKey("plant_catalogue.id"), index=True)
     stage_name: Mapped[str] = mapped_column(String(100))
     action_type: Mapped[str] = mapped_column(String(50))  # SOWING|TRANSPLANT|WATER|FERTILIZE|HARVEST|CHECK
     days_from_sowing: Mapped[int] = mapped_column(Integer)
