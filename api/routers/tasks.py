@@ -70,6 +70,24 @@ def complete_task(
     return task
 
 
+@router.post("/{task_id}/uncomplete", response_model=TaskOut)
+def uncomplete_task(
+    task_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    task = db.get(Task, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    _assert_ownership(task, user, db)
+    task.completed_at = None
+    task.skipped = False
+    task.notes = None
+    db.commit()
+    db.refresh(task)
+    return task
+
+
 @router.post("/{task_id}/skip", response_model=TaskOut)
 def skip_task(
     task_id: int,

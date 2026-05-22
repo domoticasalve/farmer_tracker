@@ -28,6 +28,11 @@ export function CalendarView({ tasks, gardenId }: CalendarViewProps) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', gardenId] })
   })
 
+  const uncomplete = useMutation({
+    mutationFn: (id: number) => tasksApi.uncomplete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tasks', gardenId] })
+  })
+
   const tasksByDate = useMemo(() => {
     const map: Record<string, Task[]> = {}
     tasks.forEach(t => {
@@ -129,14 +134,19 @@ export function CalendarView({ tasks, gardenId }: CalendarViewProps) {
                   return (
                     <button
                       key={task.id}
-                      disabled={done || task.skipped || complete.isPending}
-                      onClick={() => !done && !task.skipped && complete.mutate(task.id)}
+                      disabled={task.skipped || complete.isPending || uncomplete.isPending}
+                      onClick={() => {
+                        if (task.skipped) return
+                        if (done) uncomplete.mutate(task.id)
+                        else complete.mutate(task.id)
+                      }}
                       className={cn(
                         'task-chip w-full justify-start truncate cursor-pointer',
                         meta.bg, meta.border, meta.text,
-                        done || task.skipped ? 'opacity-50 line-through cursor-default' : 'hover:brightness-95'
+                        task.skipped ? 'opacity-40 cursor-default' : 'hover:brightness-95',
+                        done ? 'opacity-60 line-through' : ''
                       )}
-                      title={task.title}
+                      title={done ? `${task.title} (clic para desmarcar)` : task.title}
                     >
                       {task.auto_skipped_by_rain
                         ? <CloudRain size={9} className="text-water-500 shrink-0" />

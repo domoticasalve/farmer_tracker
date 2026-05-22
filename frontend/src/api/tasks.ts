@@ -18,6 +18,7 @@ export const tasksApi = {
     const qs = params.toString()
     return api.get<Task[]>(`/tasks${qs ? '?' + qs : ''}`)
   },
-  complete: (id: number, notes?: string) => api.post<Task>(`/tasks/${id}/complete`, { notes }),
-  skip:     (id: number, notes?: string) => api.post<Task>(`/tasks/${id}/skip`,     { notes }),
+  complete:   (id: number, notes?: string) => api.post<Task>(`/tasks/${id}/complete`,   { notes }),
+  uncomplete: (id: number)               => api.post<Task>(`/tasks/${id}/uncomplete`, {}),
+  skip:       (id: number, notes?: string) => api.post<Task>(`/tasks/${id}/skip`,     { notes }),
 }
