@@ -28,5 +28,6 @@ class GardenOut(BaseModel):
     location_label: str | None
     photo_url: str | None
     created_at: datetime
+    plant_count: int = 0
 
     model_config = {"from_attributes": True}

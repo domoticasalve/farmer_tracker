@@ -80,6 +80,7 @@ export default function DashboardPage() {
             <GardenCard
               key={garden.id}
               garden={garden}
+              plantCount={garden.plant_count}
               pendingTaskCount={todayTasks?.length ?? 0}
             />
           ))}

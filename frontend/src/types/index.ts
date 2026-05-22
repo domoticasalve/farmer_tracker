@@ -15,6 +15,7 @@ export interface Garden {
   location_label?: string
   photo_url?: string
   created_at: string
+  plant_count: number
 }
 
 export interface PlantListItem {

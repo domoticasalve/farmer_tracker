@@ -22,9 +22,23 @@ def _own_garden(garden_id: int, user: User, db: Session) -> Garden:
     return garden
 
 
+def _with_plant_count(garden: Garden) -> GardenOut:
+    data = GardenOut.model_validate(garden)
+    data.plant_count = len(garden.garden_plants)
+    return data
+
+
 @router.get("", response_model=list[GardenOut])
 def list_gardens(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return db.query(Garden).filter(Garden.user_id == user.id).order_by(Garden.created_at).all()
+    from sqlalchemy.orm import joinedload
+    gardens = (
+        db.query(Garden)
+        .options(joinedload(Garden.garden_plants))
+        .filter(Garden.user_id == user.id)
+        .order_by(Garden.created_at)
+        .all()
+    )
+    return [_with_plant_count(g) for g in gardens]
 
 
 @router.post("", response_model=GardenOut, status_code=201)
